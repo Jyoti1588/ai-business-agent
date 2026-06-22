@@ -81,7 +81,7 @@ User:
     return {
         "reply": final_result.get("reply", ""),
         "action": final_result.get("action", "none"),
-        "tool_result": final_result.get("tool_result", {}),
-        "reflection": final_result.get("reflection", {}),
+        "tool_result": final_result.get("tool_result") or {},
+        "reflection": final_result.get("reflection") or {},
         "final": True
     }
