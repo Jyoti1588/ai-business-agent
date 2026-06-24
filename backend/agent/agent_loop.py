@@ -1,46 +1,47 @@
 import json
 
-from backend.agent.memory import save_memory
-from backend.agent.planner import create_plan
-from backend.agent.reflection import reflect
 from backend.tools_router import execute_tool
-def run_agent(ai_response: dict, user_message: str):
-    
+from backend.agent.memory import save_memory
+from backend.agent.reflection import reflect
+from backend.agent.planner import create_plan
 
-    action = ai_response.get("action", "none")
+
+def run_agent(ai_response: dict, user_message: str):
+
+    actions = ai_response.get("actions", [])
     reply = ai_response.get("reply", "")
 
     tool_results = {}
 
-    # 🚨 GATE: DO NOT RUN TOOLS for normal chat
-    if action == "none":
+    if not actions:
         return {
             "reply": reply,
-            "action": action,
-            "tool_result": None,
-            "reflection": None,
+            "actions": [],
+            "tool_result": {},
+            "reflection": {},
             "final": True
         }
 
-    # 🧠 PLAN ONLY WHEN ACTION EXISTS
-    plan = create_plan(action)
+    # PLAN → EXECUTE
+    for action in actions:
+        steps = create_plan(action)
 
-    for step in plan:
-        result = execute_tool(step, user_message)
-        tool_results[step] = result
+        for step in steps:
+            tool_results[step] = execute_tool(step, user_message)
 
-    reflection_raw = reflect(user_message, tool_results)
-
+    # REFLECTION (safe fallback)
     try:
-        reflection = json.loads(reflection_raw)
+        reflection = json.loads(reflect(user_message, tool_results))
     except:
         reflection = {"is_correct": True}
 
+    # MEMORY
+    save_memory("default", "last_message", user_message)
     save_memory("default", "last_execution", tool_results)
 
     return {
         "reply": reply,
-        "action": action,
+        "actions": actions,
         "tool_result": tool_results,
         "reflection": reflection,
         "final": True

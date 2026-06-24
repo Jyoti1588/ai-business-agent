@@ -1,6 +1,6 @@
 memory_store = {}
 
-def save_memory(user_id: str, key: str, value: str):
+def save_memory(user_id: str, key: str, value):
     if user_id not in memory_store:
         memory_store[user_id] = {}
 
