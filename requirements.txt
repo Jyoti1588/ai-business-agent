@@ -4,11 +4,14 @@ uvicorn==0.30.1
 google-genai
 
 pydantic
-
 python-dotenv==1.0.1
 requests==2.32.3
 
 python-multipart==0.0.9
 tqdm==4.66.4
 
+# 🔥 RAG / AI DEPENDENCIES
 faiss-cpu
+sentence-transformers
+numpy
+torch
